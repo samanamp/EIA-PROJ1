@@ -1,4 +1,3 @@
-
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -10,12 +9,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.lightcouch.CouchDbClient;
 import org.lightcouch.NoDocumentException;
-import org.lightcouch.View;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 
 /**
  * Servlet implementation class Confirm
@@ -23,7 +17,7 @@ import com.google.gson.JsonObject;
 @WebServlet("/Confirm")
 public class Confirm extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private static final String serverEmailAddress = "samana@student.unimelb.edu.au";
+
 	/**
 	 * @see HttpServlet#HttpServlet()
 	 */
@@ -41,26 +35,16 @@ public class Confirm extends HttpServlet {
 		PrintWriter out = response.getWriter();
 		String token = request.getParameter("token");
 
-		/************* Database connection **************/
-		CouchDbClient dbClient = new CouchDbClient("newproj1db", true, "http",
-				"127.0.0.1", 5984, "saman", "123");
+		DBHandler dbHandler = new DBHandler();
 		try {
-			//Set confirmed flag as true
-			UserData udata = dbClient.find(UserData.class, token);
-			udata.setConfirmed(true);
-			out.println("Found : "+udata.getEmail());
-
-			//updating the database
-			Gson gson = new Gson();
-			String jsonString = gson.toJson(udata);
 			
-			JsonObject jsonobj = dbClient.getGson().fromJson(jsonString,
-					JsonObject.class);
+			UserData userData = dbHandler.findByToken(token);
 
-			dbClient.update(jsonobj);
-			out.println("Updated Confirmation Status : "+udata.getEmail());
-			//Send password to user
-			SendPassword.sendNewPasswordForID(token, serverEmailAddress, dbClient);
+			userData.setConfirmed(true);
+			
+			SendPassword.sendNewPasswordForUser(userData);
+			
+			dbHandler.updateObject(userData);
 			out.println("Sent password Email");
 
 		} catch (NoDocumentException e) {
@@ -72,10 +56,9 @@ public class Confirm extends HttpServlet {
 			e.printStackTrace(out);
 		} catch (AddressException e) {
 			out.println("Error in email Address");
-		} catch (MessagingException e){
+		} catch (MessagingException e) {
 			out.println("Internal messaging error");
 		}
-
 	}
 
 	/**
