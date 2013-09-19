@@ -26,6 +26,10 @@ public class DBHandler {
 		return dbClient.contains(email);
 	}
 	
+	public UserData findByEmail(String email){
+		return dbClient.find(UserData.class, email);
+	}
+	
 	public UserData findByToken(String token) throws NoDocumentException, IllegalArgumentException{
 		UserData ud = null;
 		List<UserData> list = dbClient.view("_all_docs").includeDocs(true).query(UserData.class);

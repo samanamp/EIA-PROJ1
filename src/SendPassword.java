@@ -21,4 +21,18 @@ public class SendPassword {
 		emailHandler.start();
 
 	}
+
+	public static void sendReminder(UserData userData, long timeBetweenTries)
+			throws Exception {
+		// if less than 5 minutes passes from last confirmation?
+		if ((System.currentTimeMillis() - userData.getReminderTimestamp()) < timeBetweenTries)
+			throw new Exception(
+					"You have requested it less than 5 minutes ago! Try Again later");
+		// send password
+		EmailHandler emailHandler = new EmailHandler(userData.getEmail(),
+				"Email Reminder",
+				"You have requested a password reminder, your password is:\n"
+						+ userData.getPassword());
+		emailHandler.start();
+	}
 }
