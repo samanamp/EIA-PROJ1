@@ -1,3 +1,5 @@
+import java.util.List;
+
 import org.lightcouch.CouchDbClient;
 import org.lightcouch.NoDocumentException;
 
@@ -26,12 +28,20 @@ public class DBHandler {
 	
 	public UserData findByToken(String token) throws NoDocumentException, IllegalArgumentException{
 		UserData ud = null;
-		
+		List<UserData> list = dbClient.view("_all_docs").includeDocs(true).query(UserData.class);
+		int listSize = list.size();
+		for(int i = 0;i<listSize;i++){
+			if(list.get(i).getToken().equalsIgnoreCase(token))
+				return list.get(i);
+		}
 		return ud;
 	}
 	
 	public void updateObject(UserData userObject){
-		
+		Gson gson = new Gson();
+		String jsonString = gson.toJson(userObject);
+		JsonObject jsonobj = dbClient.getGson().fromJson(jsonString, JsonObject.class);
+		dbClient.update(jsonobj);
 	}
 	public void closeConnection(){
 		dbClient.shutdown();

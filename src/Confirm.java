@@ -32,6 +32,15 @@ public class Confirm extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
+		try{
+			appLogic(request, response);
+		}catch(Exception e){
+			e.printStackTrace(response.getWriter());
+		}
+	}
+	
+	private synchronized void appLogic(HttpServletRequest request,
+			HttpServletResponse response) throws IOException{
 		PrintWriter out = response.getWriter();
 		String token = request.getParameter("token");
 
@@ -39,7 +48,8 @@ public class Confirm extends HttpServlet {
 		try {
 			
 			UserData userData = dbHandler.findByToken(token);
-
+			if(userData == null)
+				throw new NoDocumentException("No document found with specified token");
 			userData.setConfirmed(true);
 			
 			SendPassword.sendNewPasswordForUser(userData);
