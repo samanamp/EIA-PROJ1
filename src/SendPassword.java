@@ -15,7 +15,7 @@ public class SendPassword {
 
 		// Send email address
 		String emailMessage = "The password for your proj1 account is: "
-				+ password + "\n Keep it secret, keep it safe.";
+				+ password + "<br /> Keep it secret, keep it safe.";
 		EmailHandler emailHandler = new EmailHandler(email, "Account Password",
 				emailMessage);
 		emailHandler.start();

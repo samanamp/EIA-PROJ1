@@ -66,7 +66,7 @@ public class UserData {
 	
 	public static boolean ifValidEmailAddress(String emailAddress) {
 
-	    Pattern regexPattern = Pattern.compile("^[(a-zA-Z-0-9-\\_\\+\\.)]+@[(a-z-A-z)]+\\.[(a-zA-z)]{2,3}$");
+	    Pattern regexPattern = Pattern.compile("^[(a-zA-Z-0-9-\\_\\+\\.)]+@[(a-z-A-z)\\.]+[(a-zA-z)]{2,3}$");
 	    Matcher regMatcher   = regexPattern.matcher(emailAddress);
 	    if(regMatcher.matches()){
 	        return true;

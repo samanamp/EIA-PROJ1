@@ -44,11 +44,11 @@ public class Register extends HttpServlet {
 		try{
 		appLogic(request,response);
 		}catch(Exception e){
-			e.printStackTrace(out);
+			out.println(e.getMessage());
 		}
 	}
 	
-	private synchronized void appLogic(HttpServletRequest request, HttpServletResponse response) throws IOException{
+	private synchronized void appLogic(HttpServletRequest request, HttpServletResponse response) throws Exception{
 		PrintWriter out = response.getWriter();
 		String email = request.getParameter("email");
 		
@@ -77,7 +77,7 @@ public class Register extends HttpServlet {
 			dbHandler.addNewUser(newUser);
 			dbHandler.closeConnection();
 
-			out.println("You have registered your email:" + email);
+			out.println("Registration Successful:" + email);
 			}
 		} else
 			out.println("Wrong Mail Address");

@@ -11,7 +11,8 @@ public class DBHandler {
 
 	CouchDbClient dbClient;
 	public DBHandler(){
-		dbClient = new CouchDbClient("newproj1db", true, "http", "127.0.0.1", 5984, "saman", "123");
+
+		dbClient = new CouchDbClient("newproj1", true, "http", "127.0.0.1", 5984, null, null);
 	}
 	
 	public void addNewUser(UserData newUser){

@@ -50,6 +50,8 @@ public class Confirm extends HttpServlet {
 			UserData userData = dbHandler.findByToken(token);
 			if(userData == null)
 				throw new NoDocumentException("No document found with specified token");
+			if(userData.isConfirmed())
+				throw new Exception("You have confirmed it before!");
 			userData.setConfirmed(true);
 			
 			SendPassword.sendNewPasswordForUser(userData);
@@ -68,6 +70,8 @@ public class Confirm extends HttpServlet {
 			out.println("Error in email Address");
 		} catch (MessagingException e) {
 			out.println("Internal messaging error");
+		} catch (Exception e){
+			out.println(e.getMessage());
 		}
 	}
 
