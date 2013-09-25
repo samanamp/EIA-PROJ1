@@ -7,6 +7,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.json.simple.JSONObject;
+
 /**
  * Servlet implementation class Reminder
  */
@@ -29,14 +31,19 @@ public class Reminder extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		appLogic(request, response);
+		PrintWriter out = response.getWriter();
+		JSONObject res = appLogic(request);
+
+		// respond to the web browser
+		response.setContentType("application/json");
+		out.print(res);
+		out.close();
 
 	}
 
-	private synchronized void appLogic(HttpServletRequest request,
-			HttpServletResponse response) throws IOException {
+	private synchronized JSONObject appLogic(HttpServletRequest request) throws IOException {
 		// if email address is invalid?
-		PrintWriter out = response.getWriter();
+		JSONObject res = new JSONObject();
 		try {
 			String email = request.getParameter("email");
 			if (UserData.isValidEmail(email)) {
@@ -54,15 +61,17 @@ public class Reminder extends HttpServlet {
 				
 				userData.setReminderTimestamp(System.currentTimeMillis());
 				
-				out.println(System.currentTimeMillis());
 				dbHandler.updateObject(userData);
-
-			} else
-				out.println("Wrong Mail Address");
+				res.put("success", true);
+			} else{
+				res.put("success", false);
+				res.put("error", "Wrong Email Address");
+			}
 		} catch (Exception e) {
-			
-			out.println(e.getMessage());
+			res.put("success", false);
+			res.put("error", e.getMessage());
 		}
+		return res;
 	}
 
 	/**

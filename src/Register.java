@@ -8,6 +8,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.json.simple.JSONObject;
+
 /**
  * Servlet implementation class Register
  */
@@ -32,6 +34,8 @@ public class Register extends HttpServlet {
 		// TODO Auto-generated method stub
 		PrintWriter out = response.getWriter();
 		out.println("Hello World");
+		
+		
 	}
 
 	/**
@@ -42,22 +46,33 @@ public class Register extends HttpServlet {
 			HttpServletResponse response) throws ServletException, IOException {
 		PrintWriter out = response.getWriter();
 		try{
-		appLogic(request,response);
+		
+		
+		JSONObject res = appLogic(request);
+
+		// respond to the web browser
+		response.setContentType("application/json");
+		out.print(res);
+		out.close();
+		
 		}catch(Exception e){
 			out.println(e.getMessage());
 		}
 	}
 	
-	private synchronized void appLogic(HttpServletRequest request, HttpServletResponse response) throws Exception{
-		PrintWriter out = response.getWriter();
+	private synchronized JSONObject appLogic(HttpServletRequest request) throws Exception{
+
+		JSONObject res = new JSONObject();
 		String email = request.getParameter("email");
 		
 		if (UserData.isValidEmail(email)) {
 			DBHandler dbHandler = new DBHandler();
 			UserData newUser = new UserData();
 			newUser.setEmail(email);
-			if(dbHandler.ifUserExists(email))
-				out.println("This email has registered before");
+			if(dbHandler.ifUserExists(email)){
+				res.put("success", false);
+				res.put("error", "User has registered before with this email address");
+			}
 			else{
 			/******** Send Confirmation Link ***************/
 			String token = SecureGen.generateSecureString(32);
@@ -77,10 +92,13 @@ public class Register extends HttpServlet {
 			dbHandler.addNewUser(newUser);
 			dbHandler.closeConnection();
 
-			out.println("Registration Successful:" + email);
+			res.put("success", true);
 			}
-		} else
-			out.println("Wrong Mail Address");
+		} else{
+			res.put("success", false);
+		res.put("error", "Wrong Email Address");
+		}
+		return res;
 	}
 
 }
