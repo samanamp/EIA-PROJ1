@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.lightcouch.CouchDbClient;
 import org.lightcouch.DocumentConflictException;
+
 import org.lightcouch.NoDocumentException;
 
 import com.google.gson.Gson;
@@ -68,33 +69,6 @@ public class DBHandler {
 	}
 
 	/**
-	 * Returns the UserData Object given the user e-mail if it exists.
-	 * 
-	 * @param userEmail
-	 * @return The UserData Object. If not found then null is returned.
-	 * @throws NoDocumentException
-	 *             In case there is no user with the specified e-mail.
-	 */
-//	public UserData getUser(String userEmail) throws NoDocumentException {
-//
-//		List<UserData> users = dbClient.view("reset/user_list")
-//				.includeDocs(true).query(UserData.class);
-//		UserData user = null;
-//		for (int i = 0; i < users.size(); i++) {
-//			if (users.get(i).getEmail().toLowerCase()
-//					.equals(userEmail.toLowerCase())) {
-//				user = users.get(i);
-//				break;
-//			}
-//		}
-//
-//		if (user == null)
-//			throw new NoDocumentException("The user " + userEmail
-//					+ " is not defined");
-//		return user;
-//	}
-
-	/**
 	 * Writes errors into the database
 	 * 
 	 * @param type
@@ -111,42 +85,23 @@ public class DBHandler {
 		error.setMessage(t.getMessage());
 		error.setDetail(getStackTrace(t));
 
-		String jsonString = gson.toJson(error);
-		JsonObject jsonobj = dbClient.getGson().fromJson(jsonString,
-				JsonObject.class);
-		dbClient.save(jsonobj);
+		addNewError(error);
 	}
 
-	/**
-	 * Get user by e-mail
-	 * 
-	 * @param email
-	 * @return
-	 */
-//	public UserData getByEmail(String email) {
-//		List<UserData> list = dbClient.view("login/email").key(email).limit(1)
-//				.includeDocs(true).query(UserData.class);
-//		try {
-//			return list.get(0);
-//		} catch (IndexOutOfBoundsException iob) {
-//			return null;
-//		}
-//
-//	}
 	public UserData getUser(String email) {
 		UserData ud = dbClient.find(UserData.class, email);
-		
+
 		return ud;
 	}
-	
+
 	// TODO added function (confirm we need this)
 	public boolean saveToken(String email, String token) {
 		UserData ud = dbClient.find(UserData.class, email);
 		ud.setToken(token);
 		dbClient.update(ud);
-		
+
 		ud = dbClient.find(UserData.class, email);
-		if(ud.getToken().equals(token)) {
+		if (ud.getToken().equals(token)) {
 			return true;
 		} else {
 			return false;
@@ -160,14 +115,31 @@ public class DBHandler {
 			ud.setToken(null);
 			dbClient.update(ud);
 		}
-		
+
 		ud = dbClient.find(UserData.class, email);
-		
-		if(ud.getToken() == null) {
+
+		if (ud.getToken() == null) {
 			return true;
 		} else {
 			return false;
 		}
+	}
+
+	public void addNewUser(UserData newUser) {
+		gson = new Gson();
+		String jsonString = gson.toJson(newUser);
+		JsonObject jsonobj = dbClient.getGson().fromJson(jsonString,
+				JsonObject.class);
+		jsonobj.addProperty("_id", newUser.getEmail());
+		dbClient.save(jsonobj);
+	}
+
+	public void addNewError(Error error) {
+		gson = new Gson();
+		String jsonString = gson.toJson(error);
+		JsonObject jsonobj = dbClient.getGson().fromJson(jsonString,
+				JsonObject.class);
+		dbClient.save(jsonobj);
 	}
 
 	/* To transform the Stack Trace into a String */
@@ -175,7 +147,37 @@ public class DBHandler {
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
 		t.printStackTrace(pw);
+
 		return sw.toString();
+	}
+
+	public boolean ifUserExists(String email) {
+		return dbClient.contains(email);
+	}
+
+	public UserData findByToken(String token) throws NoDocumentException,
+			IllegalArgumentException {
+		UserData ud = null;
+		List<UserData> list = dbClient.view("_all_docs").includeDocs(true)
+				.query(UserData.class);
+		int listSize = list.size();
+		for (int i = 0; i < listSize; i++) {
+			if (list.get(i).getToken().equalsIgnoreCase(token))
+				return list.get(i);
+		}
+		return ud;
+	}
+
+	public void updateObject(UserData userObject) {
+		Gson gson = new Gson();
+		String jsonString = gson.toJson(userObject);
+		JsonObject jsonobj = dbClient.getGson().fromJson(jsonString,
+				JsonObject.class);
+		dbClient.update(jsonobj);
+	}
+
+	public void closeConnection() {
+		dbClient.shutdown();
 	}
 
 }

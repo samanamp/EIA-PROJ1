@@ -7,6 +7,10 @@
   </servlet-mapping>-->
     
   <welcome-file-list>
+<<<<<<< HEAD
   	<welcome-file>index.html</welcome-file>
+=======
+  	<welcome-file>login.html</welcome-file>
+>>>>>>> ef5c452003b67e486ff4c103cf65ecec8978a689
   </welcome-file-list>
 </web-app>

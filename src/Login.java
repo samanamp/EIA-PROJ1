@@ -111,7 +111,7 @@ public class Login extends HttpServlet {
 
 			// TODO the specs say that we have to save the session_token in the
 			// DB is that really necessary?
-			token = UserData.generateSessionToken(email);
+			token = SecureGen.generateSecureString(32);
 			dbh.saveToken(ud.getEmail(), token);
 			res.put("token", token);
 		
