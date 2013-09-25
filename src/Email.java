@@ -11,7 +11,7 @@ import javax.mail.internet.MimeMessage;
 
 public class Email {
 
-	public static void sendEmail(ArrayList<String> recipients, String fromAddress, String subject, String message)
+	public void sendEmail(ArrayList<String> recipients, String fromAddress, String subject, String message)
 			throws AddressException, MessagingException {
 
 		if (message != null) {
@@ -31,7 +31,7 @@ public class Email {
 			throw new NullPointerException("A message must be defined.");
 	}
 	
-	public static void sendEmail(String recipient, String fromAddress, String subject, String message)
+	public void sendEmail(String recipient, String fromAddress, String subject, String message)
 			throws AddressException, MessagingException {
 
 		ArrayList<String> res = new ArrayList<String>();

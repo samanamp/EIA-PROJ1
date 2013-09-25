@@ -1,7 +1,4 @@
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -100,25 +97,15 @@ public class UserData {
 		return matcher.matches();
 	}
 	
-	//TODO new function
-	public static String generateSessionToken(String email)
-			throws UnsupportedEncodingException, NoSuchAlgorithmException {
+	public static boolean ifValidEmailAddress(String emailAddress) {
 
-		// int session_token = email.hashCode();// * 37;
-
-		MessageDigest m = MessageDigest.getInstance("MD5");
-		m.reset();
-		m.update(email.getBytes());
-		byte[] digest = m.digest();
-		BigInteger bigInt = new BigInteger(1, digest);
-
-		String session_token = bigInt.toString(16);
-		// Now we need to zero pad it if you actually want the full 32 chars.
-		while (session_token.length() < 32) {
-			session_token = "0" + session_token;
-		}
-
-		return session_token;
+	    Pattern regexPattern = Pattern.compile("^[(a-zA-Z-0-9-\\_\\+\\.)]+@[(a-z-A-z)\\.]+[(a-zA-z)]{2,3}$");
+	    Matcher regMatcher   = regexPattern.matcher(emailAddress);
+	    if(regMatcher.matches()){
+	        return true;
+	    } else {
+	    return false;
+	    }
 	}
 
 }
