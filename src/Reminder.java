@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.http.conn.HttpHostConnectException;
 import org.json.simple.JSONObject;
 
 /**
@@ -32,16 +33,32 @@ public class Reminder extends HttpServlet {
 	protected void doPost(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 		PrintWriter out = response.getWriter();
+		try{		
 		JSONObject res = appLogic(request);
-
-		// respond to the web browser
 		response.setContentType("application/json");
 		out.print(res);
 		out.close();
+		}catch(HttpHostConnectException e){
+			JSONObject res = new JSONObject();
+			res.put("success", false);
+			res.put("error", "Couldn't connect to database, please try again later!");
+			response.setContentType("application/json");
+			out.print(res);
+			out.close();
+		}catch(Exception e){
+			JSONObject res = new JSONObject();
+			DBHandler dbHandler = new DBHandler();
+			dbHandler.addNewError(new Error("Register servlet", "General Error", e.getMessage()));
+			res.put("success", false);
+			res.put("error", "General error occured please contact administrator!");
+			response.setContentType("application/json");
+			out.print(res);
+			out.close();
+		}
 
 	}
 
-	private synchronized JSONObject appLogic(HttpServletRequest request) throws IOException {
+	private synchronized JSONObject appLogic(HttpServletRequest request) throws IOException, HttpHostConnectException, Exception {
 		// if email address is invalid?
 		JSONObject res = new JSONObject();
 		try {

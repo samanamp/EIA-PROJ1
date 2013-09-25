@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.http.conn.HttpHostConnectException;
 import org.lightcouch.NoDocumentException;
 
 /**
@@ -43,30 +44,36 @@ public class Confirm extends HttpServlet {
 			HttpServletResponse response) throws IOException{
 		PrintWriter out = response.getWriter();
 		String token = request.getParameter("token");
-
-		DBHandler dbHandler = new DBHandler();
+		String email = request.getParameter("email");
+		
 		try {
+			DBHandler dbHandler = new DBHandler();
 			
-			UserData userData = dbHandler.findByToken(token);
-			if(userData == null)
-				throw new NoDocumentException("No document found with specified token");
+			if(!dbHandler.ifUserExists(email))
+				throw new NoDocumentException("No document found with specified email");
+			
+			UserData userData = dbHandler.getUser(email);
+			
+			if(!userData.getToken().equalsIgnoreCase(token))
+				throw new Exception("Token and Email doesn't match!");
 			if(userData.isConfirmed())
 				throw new Exception("You have confirmed it before!");
+			
 			userData.setConfirmed(true);
-			
+			out.println("User is confirmed, Checkout your email for password!");
 			SendPassword.sendNewPasswordForUser(userData);
-			
 			dbHandler.updateObject(userData);
-			out.println("Sent password Email");
 
 		} catch (NoDocumentException e) {
-			out.println("No Document was found! with token: "+token);
+			out.println("You haven't registered yet with email: "+email);
 		} catch (IllegalArgumentException e) {
 			out.println("you should provide the token string!");
 		} catch (AddressException e) {
 			out.println("Error in email Address");
 		} catch (MessagingException e) {
 			out.println("Internal messaging error");
+		} catch (HttpHostConnectException e){
+			out.println("Can not connect to DB, please try again later!");
 		} catch (Exception e){
 			out.println(e.getMessage());
 		}

@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.http.conn.HttpHostConnectException;
 import org.json.simple.JSONObject;
 
 /**
@@ -55,17 +56,31 @@ public class Register extends HttpServlet {
 		out.print(res);
 		out.close();
 		
+		}catch(HttpHostConnectException e){
+			JSONObject res = new JSONObject();
+			res.put("success", false);
+			res.put("error", "Couldn't connect to database, please try again later!");
+			response.setContentType("application/json");
+			out.print(res);
+			out.close();
 		}catch(Exception e){
-			out.println(e.getMessage());
+			JSONObject res = new JSONObject();
+			DBHandler dbHandler = new DBHandler();
+			dbHandler.addNewError(new Error("Register servlet", "General Error", e.getMessage()));
+			res.put("success", false);
+			res.put("error", "General error occured please contact administrator!");
+			response.setContentType("application/json");
+			out.print(res);
+			out.close();
 		}
 	}
 	
-	private synchronized JSONObject appLogic(HttpServletRequest request) throws Exception{
-
+	private synchronized JSONObject appLogic(HttpServletRequest request) throws HttpHostConnectException, Exception{
 		JSONObject res = new JSONObject();
 		String email = request.getParameter("email");
 		
 		if (UserData.isValidEmail(email)) {
+			
 			DBHandler dbHandler = new DBHandler();
 			UserData newUser = new UserData();
 			newUser.setEmail(email);
@@ -81,7 +96,7 @@ public class Register extends HttpServlet {
 			String confirmMessage = "Please confirm your registration by clicking on following link: \n"
 					+ "<a href=\"http://"
 					+ request.getLocalAddr()
-					+ ":8080/proj1/Confirm?token=" + token + "\">Click me!</a>";
+					+ ":8080/proj1/Confirm?token=" + token + "&email="+email+"\">Click me!</a>";
 			EmailHandler emailHandler = new EmailHandler(email,
 					"Account Confirmation", confirmMessage);
 			emailHandler.start();
