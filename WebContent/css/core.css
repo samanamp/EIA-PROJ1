@@ -1,0 +1,32 @@
+html, body {height:99%;}
+body, div { font-family: Lucida Grande,Lucida Sans,Arial,sans-serif; }
+body { margin: 0; padding: 0; font-size: 1.1em; color: #333 }
+h1, h2 { font-family: 'trebuchet ms', verdana, arial; padding: 10px; margin: 0 }
+h1 { font-size: large }
+	
+p { margin: 10px 0; }
+
+li { margin-left: 10px; }
+
+h3 { margin: 1em 0 0; }
+
+h1 { font-size: 2em; }
+h2 { font-size: 1.8em; }
+h3 { font-size: 1.6em; }
+h4 { font-size: 1.4em; }
+h5 { font-size: 1.2em; }
+
+#content,#frmLogin,#bottom{
+	min-height: 100%;
+	width: 600px;
+	margin: 0 auto; 
+	margin-top: 50px;
+}
+#frmLogin{
+	width: 450px;
+}
+#bottom{margin-top:0; width: 350px;}
+#content a{color: #0070a3}
+#content span{margin-left: 20px;}
+.hide{display:none;}
+#sending{color:#333}
