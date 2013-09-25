@@ -60,12 +60,9 @@ public class Confirm extends HttpServlet {
 			out.println("Sent password Email");
 
 		} catch (NoDocumentException e) {
-			out.println("No Document was found!");
-			out.println(token);
+			out.println("No Document was found! with token: "+token);
 		} catch (IllegalArgumentException e) {
 			out.println("you should provide the token string!");
-			out.println(token);
-			e.printStackTrace(out);
 		} catch (AddressException e) {
 			out.println("Error in email Address");
 		} catch (MessagingException e) {

@@ -11,7 +11,6 @@ public class DBHandler {
 
 	CouchDbClient dbClient;
 	public DBHandler(){
-
 		dbClient = new CouchDbClient("newproj1", true, "http", "127.0.0.1", 5984, null, null);
 	}
 	
@@ -20,6 +19,13 @@ public class DBHandler {
 		String jsonString = gson.toJson(newUser);
 		JsonObject jsonobj = dbClient.getGson().fromJson(jsonString, JsonObject.class);
 		jsonobj.addProperty("_id", newUser.getEmail());
+		dbClient.save(jsonobj);
+	}
+	
+	public void addNewError(Error error){
+		Gson gson = new Gson();
+		String jsonString = gson.toJson(error);
+		JsonObject jsonobj = dbClient.getGson().fromJson(jsonString, JsonObject.class);
 		dbClient.save(jsonobj);
 	}
 	
