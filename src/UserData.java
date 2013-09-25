@@ -15,7 +15,8 @@ public class UserData {
 	
 	private static final String EMAIL_PATTERN = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
 			+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
-
+	
+	public UserData(){}
 	public UserData(String _id, String _rev, String email, String token, String password,
 			long confirmationTimestamp, boolean confirmed,
 			long reminderTimestamp) {
