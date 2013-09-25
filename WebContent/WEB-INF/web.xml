@@ -1,16 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_ID" version="3.0">
   <display-name>proj1</display-name>
-  <!-- <servlet-mapping>
-    <servlet-name>Login</servlet-name>
-    <url-pattern>/</url-pattern>
-  </servlet-mapping>-->
-    
   <welcome-file-list>
-<<<<<<< HEAD
   	<welcome-file>index.html</welcome-file>
-=======
-  	<welcome-file>login.html</welcome-file>
->>>>>>> ef5c452003b67e486ff4c103cf65ecec8978a689
   </welcome-file-list>
 </web-app>
