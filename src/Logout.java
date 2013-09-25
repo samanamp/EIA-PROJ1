@@ -135,12 +135,4 @@ public class Logout extends HttpServlet {
 		doGet(request, response);
 	}
 
-	// TODO
-	public String getStackTrace(Throwable t) {
-		StringWriter sw = new StringWriter();
-		PrintWriter pw = new PrintWriter(sw);
-		t.printStackTrace(pw);
-		return sw.toString();
-	}
-
 }

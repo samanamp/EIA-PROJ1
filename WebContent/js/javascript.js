@@ -46,14 +46,14 @@ function init() {
 	 * Open Dialog for reminder and register
 	 *****************************************/
 	// TODO validate fields
-	var frmEmailValidator = $("#frmSendConfirmation").validate({
+	var frmEmailValidator = $("#frmSendRegister").validate({
 		rules: {
-			txtSendConfirmation: {
+			txtSendRegister: {
 				required: true,
 				email: true
 			}
 		},
-		errorLabelContainer : $("#frmSendConfirmation ul#error")
+		errorLabelContainer : $("#frmSendRegister ul#error")
 	});
 	
 	var frmEmailReminderValidator = $("#frmSendReminder").validate({
@@ -66,7 +66,7 @@ function init() {
 		errorLabelContainer : $("#frmSendReminder ul#error")
 	});
 	
-	$("#sendConfirmationContent,#sendReminderContent").dialog({
+	$("#sendRegisterContent,#sendReminderContent").dialog({
 		autoOpen : false,
         show: {effect: "blind",duration: 500},
         hide: {effect: "explode",duration: 500},
@@ -83,13 +83,13 @@ function init() {
 		}
 	});
 	
-	$( "#sendConfirmationContent" ).dialog( "option", "title", "Register" );	
-	$( "#sendConfirmationContent" ).dialog( "option", "buttons", [ {
-		id: "btnSendConfirmation",
+	$( "#sendRegisterContent" ).dialog( "option", "title", "Register" );	
+	$( "#sendRegisterContent" ).dialog( "option", "buttons", [ {
+		id: "btnSendRegister",
     	text: "Register", 
 		click: function(){
-			if($("#frmSendConfirmation").valid()){
-				sendConfirmation();
+			if($("#frmSendRegister").valid()){
+				sendRegister();
 			}
 		} 
     }] );
@@ -107,7 +107,7 @@ function init() {
     }] );
 
 	$("#lnkRegister a").bind("click", function() {
-		$("#sendConfirmationContent").dialog("open");
+		$("#sendRegisterContent").dialog("open");
 	});
 	
 	$("#lnkReminder a").bind("click", function() {
@@ -151,11 +151,15 @@ function sendAjax(settings){
 		async : false,
 		success : settings.success,
 		beforeSend : settings.beforeSend,
-		complete : settings.complete,
+		complete : function() {
+			$("#" + settings.form_id + " button").attr("disabled", false);
+			$("#" + settings.form_id).find("#sending").remove();
+			$("#" + settings.form_id).find("#" + settings.form_id + " #success").remove();
+		},
 		error : function( jqXHR, textStatus, errorThrown){
 			//this should never happen
-			$("#sending").remove();
-			$("#" + settings.form_id + " #error").html(
+			$("#" + settings.form_id).find("#sending").remove();
+			$("#" + settings.form_id).find("#error").html(
 					"<label class=\"error\">An error has ocurred: " + textStatus + 
 					((errorThrown != undefined && errorThrown != "") ? ": " + errorThrown : "") + 
 					". <br />Please contact the system administrator.</label>")
@@ -193,10 +197,10 @@ function sendLogin() {
 		beforeSend : function() {
 			$("#btnLogin").attr("disabled", true);
 			$("#frmLogin #error").html(sendingEmail);
-		},
-		complete : function() {
-			$("#btnLogin").attr("disabled", false);
 		}
+//		complete : function() {
+//			$("#btnLogin").attr("disabled", false);
+//		}
 	};
 	sendAjax(settings);
 }
@@ -285,38 +289,41 @@ function generateLoggedOutContent(errorMessage) {
 }
 
 /***********************************************************
- * Function to send a request to the Confirmation Servlet
+ * Function to send a request to the Register Servlet
  * it uses the sendAjax function
  ***********************************************************/
-function sendConfirmation() {
+function sendRegister() {
 	var settings = {
-		form_id : "frmSendConfirmation",	
-		url : "Confirmation",
+		form_id : "frmSendRegister",	
+		url : "Register",
 		data : {
-			"email" : $("#txtSendConfirmation").val()
+			"email" : $("#txtSendRegister").val()
 		},
 		success : function(data) {
 			if (data.success) {
 				//TODO
-				$("#frmSendConfirmation").append(
+				$("#frmSendRegister").append(
 					"<div id=\"success\"><span>" +
 					"An Email has been sent to your address. Please check your inbox and click " +
 					"in the confirmation link to activate your account." +
 					"</span></div>"
 				);
 			} else {
-				$("#frmSendConfimation #error").html(
+				$("#frmSendRegister #error").html(
 						"<label class=\"error\">" + data.error + "</label>")
 						.show();
 			}
 		},
 		beforeSend : function() {
-			$("#btnSendConfirmation").attr("disabled", true);
-			$("#frmSendConfirmation").append(sendingEmail);
-		},
-		complete : function() {
-			$("#btnSendConfirmation").attr("disabled", false);
+			$("#btnSendRegister").attr("disabled", true);
+			$("#frmSendRegister").append(sendingEmail);
 		}
+//		complete : function() {
+//			
+//			$("#btnSendRegister").attr("disabled", false);
+//			$(this).find("#sending").remove();
+//			$(this).find("#success").remove();
+//		}
 	};
 	sendAjax(settings);
 }
@@ -330,7 +337,7 @@ function sendReminder() {
 		form_id : "frmSendReminder",
 		url : "Reminder",
 		data : {
-			"email" : $("#txtEmail").val()
+			"email" : $("#txtSendReminder").val()
 		},
 		success : function(data) {
 			if (data.success) {
@@ -348,10 +355,12 @@ function sendReminder() {
 		beforeSend : function() {
 			$("#btnSendRemider").attr("disabled", true);
 			$("#frmSendReminder").append(sendingEmail);
-		},
-		complete : function() {
-			$("#btnSendReminder").attr("disabled", false);
 		}
+//		complete : function() {
+//			$("#btnSendReminder").attr("disabled", false);
+//			$(this).find("#sending").remove();
+//			$(this).find("#success").remove();
+//		}
 	};
 	sendAjax(settings);
 }
