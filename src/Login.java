@@ -27,17 +27,17 @@ public class Login extends HttpServlet {
 	 */
 	public Login() {
 		super();
-		String errorMessage = null;
-		String errorType = null;
+//		String errorMessage = null;
+//		String errorType = null;
 		try{
 			dbh = new DBHandler();
 		}catch(CouchDbException cdbe){
 			//TODO save error in a log file 
-			errorMessage = cdbe.getMessage();
-			errorType = cdbe.getClass().getSimpleName();
+//			errorMessage = cdbe.getMessage();
+//			errorType = cdbe.getClass().getSimpleName();
 		} catch(Exception e){
-			errorMessage = e.getMessage();
-			errorType = e.getClass().getSimpleName();
+//			errorMessage = e.getMessage();
+//			errorType = e.getClass().getSimpleName();
 		}	
 	}
 
@@ -73,8 +73,6 @@ public class Login extends HttpServlet {
 			if (dbh == null)
 				throw new CouchDbException("No DB connection");
 			
-			// Get session and create a new one if one doesn't exist
-//			HttpSession session = request.getSession(true);
 			String token = null;
 			String email = request.getParameter("email");
 			String password = request.getParameter("password");
@@ -138,13 +136,6 @@ public class Login extends HttpServlet {
 		}
 
 		return res;
-	}
-
-	public String getStackTrace(Throwable t) {
-		StringWriter sw = new StringWriter();
-		PrintWriter pw = new PrintWriter(sw);
-		t.printStackTrace(pw);
-		return sw.toString();
 	}
 
 	/**
