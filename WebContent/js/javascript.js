@@ -1,8 +1,7 @@
 var token = null;
 var email = null;
 var loggedInContent = null;
-var sendingEmail = "<span id=\"sending\">"
-		+ "<img src=\"css/images/loading.gif\" /> Sending email..." + "</span>";
+
 $(document).ready(function() {
 	init();
 });
@@ -44,7 +43,6 @@ function init() {
 	/***************************************************************************
 	 * Open Dialog for reminder and register
 	 **************************************************************************/
-	// TODO validate fields
 	var frmRegisterValidator = $("#frmSendRegister").validate({
 		rules : {
 			txtSendRegister : {
@@ -126,13 +124,18 @@ function init() {
 }
 
 function resetForm(elem) {
-	elem.find("#error").html("");
+	elem.find(".error").html("");
 	elem.find("#sending").remove();
 	elem.find(".success").remove();
 }
+
+function showLoading(text) {
+	return "<span id=\"sending\">" + "<img src=\"css/images/loading.gif\" /> "
+			+ text + "</span>";
+}
 /*******************************************************************************
- * Generic function to send an Ajax request to the Servlets receives a JS object
- * (settings) containing: url, data, success, beforeSend, complete
+ * Generic function to send an Ajax request to the Servlets. receives a JS
+ * object (settings) containing: form_id, url, data, success
  ******************************************************************************/
 function sendAjax(settings) {
 	if (settings.form_id == undefined)
@@ -148,17 +151,8 @@ function sendAjax(settings) {
 		settings.success = function() {
 		};
 
-	if (settings.beforeSend == undefined)
-		settings.beforeSend = function() {
-		};
-
-	if (settings.complete == undefined)
-		settings.complete = function() {
-		};
-
-	if (settings.error == undefined)
-		settings.error = function() {
-		};
+	if (settings.loadingText == undefined)
+		settings.loadingText = "";
 
 	$
 			.ajax({
@@ -169,31 +163,32 @@ function sendAjax(settings) {
 				async : false,
 				success : settings.success,
 				beforeSend : function() {
-					$("#" + settings.form_id).parent(".ui-dialog-content")
-							.siblings(".ui-dialog-buttonpane").find("button")
-							.attr("disabled", true);
-					$("#" + settings.form_id).append(sendingEmail);
+					$(settings.form_id).parent(".ui-dialog-content").siblings(
+							".ui-dialog-buttonpane").find("button").attr(
+							"disabled", true);
+					$(settings.form_id).append(
+							showLoading(settings.loadingText));
 				},
 				complete : function() {
-					$("#" + settings.form_id).parent(".ui-dialog-content")
-							.siblings(".ui-dialog-buttonpane").find("button")
-							.attr("disabled", false).removeAttr("disabled");
-					$("#" + settings.form_id).find("#sending").remove();
-					$("#" + settings.form_id).find(
-							"#" + settings.form_id + " .success").remove();
+					$(settings.form_id).parent(".ui-dialog-content").siblings(
+							".ui-dialog-buttonpane").find("button").attr(
+							"disabled", false).removeAttr("disabled");
+					$(settings.form_id).find("#sending").remove();
+					$(settings.form_id).find(settings.form_id + " .success")
+							.remove();
 				},
 				error : function(jqXHR, textStatus, errorThrown) {
 					// this should never happen
-					$("#" + settings.form_id).find("#sending").remove();
-					$("#" + settings.form_id)
+					$(settings.form_id).find("#sending").remove();
+					$(settings.form_id)
 							.find("#error")
 							.html(
-									"<label class=\"error\">An error has ocurred: "
+									"<li class=\"error\">An error has ocurred: "
 											+ textStatus
 											+ ((errorThrown != undefined && errorThrown != "") ? ": "
 													+ errorThrown
 													: "")
-											+ ". <br />Please contact the system administrator.</label>")
+											+ ". <br />Please contact the system administrator.</li>")
 							.show();
 				}
 			});
@@ -204,7 +199,7 @@ function sendAjax(settings) {
  ******************************************************************************/
 function sendLogin() {
 	var settings = {
-		form_id : "frmLogin",
+		form_id : "#frmLogin",
 		url : "Login",
 		data : {
 			"email" : $("#txtEmail").val(),
@@ -217,12 +212,7 @@ function sendLogin() {
 				generateLoggedInContent();
 			} else {
 				$("#frmLogin #error").html(
-						"<label class=\"error\">" + data.error + "</label>")
-						.show();
-				if ($("lnkRegisterHere").length > 0) {
-					$("lnkRegisterHere").bind("click", function() {
-					});
-				}
+						"<li class=\"error\">" + data.error + "</li>").show();
 			}
 		}
 	};
@@ -237,25 +227,105 @@ function generateLoggedInContent() {
 		id : "loggedIn"
 	});
 	new_div
-			.append("<p>"
-					+ "<span id=\"lnkLogout\"><a href=\"javascript:void(0)\">Logout</a></span>"
-					+ "<span id=\"lnkReset\"><a href=\"javascript:void(0)\">Reset my password</a></span>"
-					+ "<span id=\"lnkDelete\"><a href=\"javascript:void(0)\">Delete account</a></span>"
-					+ "</p>");
-	new_div.hide();
+			.append(
+					"<p>"
+							+ "<span id=\"lnkReset\"><a href=\"javascript:void(0)\">Reset my password</a></span>"
+							+ "<span id=\"lnkDelete\"><a href=\"javascript:void(0)\">Delete account</a></span>"
+							+ "<span id=\"lnkLogout\"><a href=\"javascript:void(0)\">Logout</a></span>"
+							+ "</p>"
+							+ "<div id=\"contentLoggedIn\" class=\"ui-widget\">"
+							+ "<div class=\"ui-state-highlight ui-corner-all\" style=\"margin-top: 20px; padding: 0 .7em;\">"
+							+ "<p><span class=\"ui-icon ui-icon-info\" style=\"float: left; margin-right: .3em;\"></span>"
+							+ "<strong>Congratulations!!!</strong>"
+							+ "</p>"
+							+ "<p> You have completed the registration process and have successfully logged in.</p>"
+							+ "<p>Now you can enjoy all our exiting functionality.</p>"
+							+ "<p>Things that you can do:</p>" + "<ul>"
+							+ "<li>Reset your password</li>"
+							+ "<li>Delete your account</li>"
+							+ "<li>Logout</li>" + "</ul>" + "<p>Enjoy!! :)</p>"
+							+ "</div>" + "<ul class=\"error\"></ul>" + "</div>")
+			.hide();
 
 	$("#frmLogin").fadeOut("slow", function() {
 		$("#frmLogin").remove();
 
 		$("#content").append(new_div);
-		new_div.fadeIn(300);
 
 		$("#lnkLogout").bind("click", function() {
 			sendLogout();
 		});
-		// TODO bind click event to lnkReset and lnkDelete
+
+		$("#lnkReset").bind("click", function() {
+			$(".success").remove();
+			sendReset();
+		});
+
+		$("#lnkDelete").bind("click", function() {
+			$(".success").remove();
+			sendDelete();
+		});
+
+		new_div.fadeIn(300);
 
 	});
+}
+
+/*******************************************************************************
+ * Function to send a request to the Register Servlet it uses the sendAjax
+ * function
+ ******************************************************************************/
+function sendRegister() {
+	var settings = {
+		form_id : "#frmSendRegister",
+		url : "Register",
+		data : {
+			"email" : $("#txtSendRegister").val()
+		},
+		success : function(data) {
+			if (data.success) {
+				$("#frmSendRegister")
+						.append(
+								"<ul class=\"success\"><li>"
+										+ "An Email has been sent to your address. Please check your inbox and click "
+										+ "in the confirmation link to activate your account."
+										+ "</li></ul>");
+			} else {
+				$("#frmSendRegister #error").html(
+						"<li class=\"error\">" + data.error + "</li>").show();
+			}
+		},
+		loadingText : "Registering user..."
+	};
+	sendAjax(settings);
+}
+
+/*******************************************************************************
+ * Function to send a request to the Remider Servlet it uses the sendAjax
+ * function
+ ******************************************************************************/
+function sendReminder() {
+	var settings = {
+		form_id : "#frmSendReminder",
+		url : "Reminder",
+		data : {
+			"email" : $("#txtSendReminder").val()
+		},
+		success : function(data) {
+			if (data.success) {
+				$("#frmSendReminder")
+						.append(
+								"<ul class=\"success\"><li>"
+										+ "Your password has been sent to your address please check your inbox and try to login."
+										+ "</li></ul>");
+			} else {
+				$("#frmSendReminder #error").html(
+						"<li class=\"error\">" + data.error + "</li>").show();
+			}
+		},
+		loadingText : "Sending reminder..."
+	};
+	sendAjax(settings);
 }
 
 /*******************************************************************************
@@ -265,7 +335,7 @@ function generateLoggedInContent() {
 function sendLogout() {
 	if (email != null && token != null) {
 		var settings = {
-			form_id : "frmLogin",
+			form_id : "#frmLogin",
 			url : "Logout",
 			data : {
 				"email" : email,
@@ -278,19 +348,19 @@ function sendLogout() {
 				if (!data.success) {
 					error = data.error;
 				}
-				generateLoggedOutContent(error);
+				generateLoggedOutContent(error, "error");
 			}
 		};
 		sendAjax(settings);
 	} else {
-		generateLoggedOutContent();
+		generateLoggedOutContent("Invalid token.", "error");
 	}
 }
 
 /*******************************************************************************
  * Generates the content that will appear when the user is logged out
  ******************************************************************************/
-function generateLoggedOutContent(errorMessage) {
+function generateLoggedOutContent(message, messageClass) {
 	$("#loggedIn").fadeOut(
 			500,
 			function() {
@@ -299,10 +369,16 @@ function generateLoggedOutContent(errorMessage) {
 				lic.hide();
 				$("#content").append(lic);
 
-				if (errorMessage != null) {
-					$("#frmLogin #error").html(
-							"<label class=\"error\">" + errorMessage
-									+ "</label>").show();
+				if (message != null) {
+					if (messageClass == "error") {
+						$("#frmLogin #error").html(
+								"<li class=\"error\">" + message + "</li>")
+								.show();
+					} else {
+						$("#frmLogin").before(
+								"<ul class=\"success\"><li>" + message
+										+ "</li></ul>");
+					}
 				}
 
 				init();
@@ -311,59 +387,61 @@ function generateLoggedOutContent(errorMessage) {
 }
 
 /*******************************************************************************
- * Function to send a request to the Register Servlet it uses the sendAjax
- * function
+ * Function to send a request to the Reset Servlet it uses the sendAjax function
  ******************************************************************************/
-function sendRegister() {
-	var settings = {
-		form_id : "frmSendRegister",
-		url : "Register",
-		data : {
-			"email" : $("#txtSendRegister").val()
-		},
-		success : function(data) {
-			if (data.success) {
-				// TODO
-				$("#frmSendRegister")
-						.append(
-								"<div class=\"success\"><span>"
-										+ "An Email has been sent to your address. Please check your inbox and click "
-										+ "in the confirmation link to activate your account."
-										+ "</span></div>");
-			} else {
-				$("#frmSendRegister #error").html(
-						"<label class=\"error\">" + data.error + "</label>")
-						.show();
+function sendReset() {
+	if (email != null && token != null) {
+		var settings = {
+			form_id : "#frmLogin",
+			url : "Reset",
+			data : {
+				"email" : email,
+				"token" : token
+			},
+			success : function(data) {
+				if (data.success) {
+					$("#contentLoggedIn")
+							.before(
+									"<ul class=\"success\"><li>"
+											+ "Your new password has been sent to your address please check your inbox and try to login."
+											+ "</li></ul>");
+				} else {
+					generateLoggedOutContent(data.error, "error");
+				}
 			}
-		}
-	};
-	sendAjax(settings);
+		};
+		sendAjax(settings);
+	} else {
+		generateLoggedOutContent("Invalid token.", "error");
+	}
 }
 
 /*******************************************************************************
- * Function to send a request to the Remider Servlet it uses the sendAjax
+ * Function to send a request to the Delete Servlet it uses the sendAjax
  * function
  ******************************************************************************/
-function sendReminder() {
-	var settings = {
-		form_id : "frmSendReminder",
-		url : "Reminder",
-		data : {
-			"email" : $("#txtSendReminder").val()
-		},
-		success : function(data) {
-			if (data.success) {
-				$("#frmSendReminder")
-						.append(
-								"<div class=\"success\"><span>"
-										+ "Your password has been sent to your address please check your inbox and try to login."
-										+ "</span></div>");
-			} else {
-				$("#frmSendReminder #error").html(
-						"<label class=\"error\">" + data.error + "</label>")
-						.show();
+function sendDelete() {
+	if (email != null && token != null) {
+		var settings = {
+			form_id : "#frmLogin",
+			url : "Delete",
+			data : {
+				"email" : email,
+				"token" : token
+			},
+			success : function(data) {
+				if (data.success) {
+					generateLoggedOutContent(
+							"We are sorry that you have decided to leave us. "
+									+ "We hope you come back soon :)",
+							"success");
+				} else {
+					generateLoggedOutContent(data.error, "error");
+				}
 			}
-		}
-	};
-	sendAjax(settings);
+		};
+		sendAjax(settings);
+	} else {
+		generateLoggedOutContent("Invalid token.", "error");
+	}
 }

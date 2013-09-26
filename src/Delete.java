@@ -27,7 +27,9 @@ public class Delete extends HttpServlet {
      */
     public Delete() {
         super();
-        dbh = new DBHandler();
+        try{
+        	dbh = new DBHandler();
+        } catch(Exception e){}
     }
 
 	/**

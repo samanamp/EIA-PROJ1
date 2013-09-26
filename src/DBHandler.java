@@ -1,11 +1,7 @@
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.math.BigInteger;
-import java.util.List;
-
 import org.lightcouch.CouchDbClient;
 import org.lightcouch.DocumentConflictException;
-
 import org.lightcouch.NoDocumentException;
 
 import com.google.gson.Gson;
@@ -37,8 +33,7 @@ public class DBHandler {
 
 		UserData user = this.getUser(userEmail);
 
-		String newPassword = (new BigInteger(130,
-				new java.security.SecureRandom())).toString(12);
+		String newPassword = SecureGen.generateSecureString(12);
 		user.setPassword(newPassword);
 
 		String jsonString = gson.toJson(user);
@@ -94,7 +89,6 @@ public class DBHandler {
 		return ud;
 	}
 
-	// TODO added function (confirm we need this)
 	public boolean saveToken(String email, String token) {
 		UserData ud = dbClient.find(UserData.class, email);
 		ud.setToken(token);
@@ -108,7 +102,6 @@ public class DBHandler {
 		}
 	}
 
-	// TODO confirm we need this
 	public boolean removeToken(String email, String token) {
 		UserData ud = dbClient.find(UserData.class, email);
 		if (ud.getToken().equals(token)) {
@@ -154,7 +147,6 @@ public class DBHandler {
 	public boolean ifUserExists(String email) {
 		return dbClient.contains(email);
 	}
-
 
 	public void updateObject(UserData userObject) {
 		Gson gson = new Gson();

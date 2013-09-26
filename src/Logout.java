@@ -1,17 +1,12 @@
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.StringWriter;
-
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import org.json.simple.JSONObject;
 import org.lightcouch.CouchDbException;
-import org.lightcouch.DocumentConflictException;
 
 /**
  * Servlet implementation class Chat
@@ -27,18 +22,11 @@ public class Logout extends HttpServlet {
 	 */
 	public Logout() {
 		super();
-		String errorMessage = null;
-		String errorType = null;
-		try{
+		try {
 			dbh = new DBHandler();
-		}catch(CouchDbException cdbe){
-			//TODO save error in DB not 
-			errorMessage = cdbe.getMessage();
-			errorType = cdbe.getClass().getSimpleName();
-		} catch(Exception e){
-			errorMessage = e.getMessage();
-			errorType = e.getClass().getSimpleName();
-		}	
+		} catch (Exception e) {
+			// save the error in a log file
+		}
 	}
 
 	/**
@@ -66,35 +54,37 @@ public class Logout extends HttpServlet {
 		boolean success = true;
 		String errorMessage = null;
 		String errorType = null;
-		
+
 		try {
-			//TODO add this to all servlets
 			if (dbh == null)
-				throw new CouchDbException("No DB connection");
-			
+				throw new CouchDbException(
+						"Can not connect to DB, please try again later!");
+
 			String token = request.getParameter("token");
 			String email = request.getParameter("email");
 
 			boolean isValidToken = token != null && !token.equals("");
-			
+
 			if (!UserData.isValidEmail(email) || !isValidToken)
-				throw new SecurityException("Invalid session please login again.");
+				throw new SecurityException(
+						"Invalid session please login again.");
 
 			UserData ud = dbh.getUser(email);
 			boolean isValidAccount = ud != null && ud.isConfirmed();
-			
-			if(!isValidAccount)
-				throw new SecurityException("Invalid account please login again.");
-			
+
+			if (!isValidAccount)
+				throw new SecurityException(
+						"Invalid account please login again.");
+
 			if (!token.equals(ud.getToken()))
-				throw new SecurityException("Invalid token please login again.");				
-			
+				throw new SecurityException("Invalid token please login again.");
+
 			success = dbh.removeToken(email, token);
-			
-			//this should never happen but just 
-			if(!success)
+
+			// this should never happen but just
+			if (!success)
 				throw new Exception("Internal error.");
-		
+
 		} catch (IllegalArgumentException iae) {
 			errorMessage = iae.getMessage();
 			errorType = iae.getClass().getSimpleName();
@@ -110,12 +100,11 @@ public class Logout extends HttpServlet {
 			errorType = e.getClass().getSimpleName();
 			try {
 				dbh.writeError(errorType, e);
-			} catch(Exception e1){
-				//TODO write the error in a log file
+			} catch (Exception e1) {
+				// write the error in a log file
 			}
-		}  finally {
+		} finally {
 			if (errorMessage != null) {
-				// TODO save error in the DB
 				success = false;
 				res.put("error", errorMessage);
 			}

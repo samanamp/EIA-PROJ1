@@ -27,7 +27,9 @@ public class Reset extends HttpServlet {
      */
     public Reset() {
         super();
-        dbh = new DBHandler();
+        try{
+        	dbh = new DBHandler();
+        } catch(Exception e){}
     }
 
 	/**

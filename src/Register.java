@@ -23,7 +23,6 @@ public class Register extends HttpServlet {
 	 */
 	public Register() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -32,9 +31,7 @@ public class Register extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		PrintWriter out = response.getWriter();
-		out.println("Hello World");
+		doPost(request,response);
 		
 		
 	}
@@ -111,7 +108,7 @@ public class Register extends HttpServlet {
 			}
 		} else{
 			res.put("success", false);
-		res.put("error", "Wrong Email Address");
+			res.put("error", "Wrong Email Address");
 		}
 		return res;
 	}
