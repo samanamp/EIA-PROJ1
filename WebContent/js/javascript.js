@@ -125,12 +125,12 @@ function init() {
 
 function resetForm(elem) {
 	elem.find(".error").html("");
-	elem.find("#sending").remove();
+	$("#sending").remove();
 	elem.find(".success").remove();
 }
 
 function showLoading(text) {
-	return "<span id=\"sending\">" + "<img src=\"css/images/loading.gif\" /> "
+	return "<span id=\"sending\"><img src=\"css/images/loading.gif\" /> "
 			+ text + "</span>";
 }
 /*******************************************************************************
@@ -160,26 +160,38 @@ function sendAjax(settings) {
 				dataType : "json",
 				url : settings.url,
 				data : settings.data,
-				async : false,
 				success : settings.success,
 				beforeSend : function() {
-					$(settings.form_id).parent(".ui-dialog-content").siblings(
-							".ui-dialog-buttonpane").find("button").attr(
-							"disabled", true);
-					$(settings.form_id).append(
-							showLoading(settings.loadingText));
+					if ($(settings.form_id).parent(".ui-dialog-content").length > 0) {
+						$(settings.form_id).parent(".ui-dialog-content")
+								.siblings(".ui-dialog-buttonpane").find(
+										".ui-dialog-buttonset").find("button")
+								.hide();
+
+						$(settings.form_id).parent(".ui-dialog-content")
+								.siblings(".ui-dialog-buttonpane").find(
+										".ui-dialog-buttonset").append(
+										showLoading(settings.loadingText));
+
+					} else {
+						$(settings.form_id).find("input[type=submit]").hide()
+								.after(showLoading(settings.loadingText))// login
+					}
+
 				},
 				complete : function() {
 					$(settings.form_id).parent(".ui-dialog-content").siblings(
-							".ui-dialog-buttonpane").find("button").attr(
-							"disabled", false).removeAttr("disabled");
-					$(settings.form_id).find("#sending").remove();
+							".ui-dialog-buttonpane").find("button").show();
+
+					$(settings.form_id).find("input[type=submit]").show();// for
+																			// login
+																			// case
+					$("#sending").remove();
 					$(settings.form_id).find(settings.form_id + " .success")
 							.remove();
 				},
 				error : function(jqXHR, textStatus, errorThrown) {
 					// this should never happen
-					$(settings.form_id).find("#sending").remove();
 					$(settings.form_id)
 							.find("#error")
 							.html(
@@ -214,7 +226,8 @@ function sendLogin() {
 				$("#frmLogin #error").html(
 						"<li class=\"error\">" + data.error + "</li>").show();
 			}
-		}
+		},
+		loadingText : "Logging in..."
 	};
 	sendAjax(settings);
 }

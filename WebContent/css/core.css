@@ -30,8 +30,8 @@ h5 { font-size: 1.2em; }
 #content span,#content p,
 #contentLoggedIn p,
 #contentLoggedIn ul
-{margin-left: 20px;}
+{margin-left: 25px;}
 #contentLoggedIn ul{list-style-position: inside;}
 .hide{display:none;}
-#sending{color:#333}
+#sending{color:#333;margin: 0.5em 0.4em 0.5em 0;display:block;padding: .4em 1em;}
 .ui-widget-content{border:none;}

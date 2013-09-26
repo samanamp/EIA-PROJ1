@@ -72,7 +72,7 @@ public class Confirm extends HttpServlet {
 		} catch (MessagingException e) {
 			out.println("Internal messaging error");
 		} catch (HttpHostConnectException e){
-			out.println("Can not connect to DB, please try again later!");
+			out.println("Cannot connect to DB, please try again later!");
 		} catch (Exception e){
 			out.println(e.getMessage());
 		}

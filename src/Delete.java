@@ -50,8 +50,15 @@ public class Delete extends HttpServlet {
 	public synchronized JSONObject executeSynchronizedLogic(HttpServletRequest request) {
 
 		JSONObject res = new JSONObject();
-
+		DBHandler dbh = null;
 		try {
+			try {
+				dbh = new DBHandler();
+			} catch (Exception e){
+				res.put("success", false);
+				res.put("error", "Cannot connect to DB, please try again later!");
+				return res;
+			}
 			// Validate if the e-mail is valid.
 			String email = (String) request.getParameter("email");
 			boolean result = true;

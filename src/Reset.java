@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.json.simple.JSONObject;
+import org.lightcouch.CouchDbException;
 import org.lightcouch.DocumentConflictException;
 import org.lightcouch.NoDocumentException;
 
@@ -20,16 +21,12 @@ import org.lightcouch.NoDocumentException;
 public class Reset extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
-	private DBHandler dbh;
        
     /**
      * @see HttpServlet#HttpServlet()
      */
     public Reset() {
         super();
-        try{
-        	dbh = new DBHandler();
-        } catch(Exception e){}
     }
 
 	/**
@@ -50,8 +47,16 @@ public class Reset extends HttpServlet {
 	public synchronized JSONObject executeSynchronizedLogic(HttpServletRequest request) {
 
 		JSONObject res = new JSONObject();
-
-		try {		
+		DBHandler dbh = null;
+		try {
+			try {
+				dbh = new DBHandler();
+			} catch (Exception e){
+				res.put("success", false);
+				res.put("error", "Cannot connect to DB, please try again later!");
+				return res;
+			}
+			
 			// Validate if the e-mail is valid.
 			String email = (String) request.getParameter("email");
 			boolean result = true;

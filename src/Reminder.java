@@ -40,7 +40,7 @@ public class Reminder extends HttpServlet {
 		}catch(HttpHostConnectException e){
 			JSONObject res = new JSONObject();
 			res.put("success", false);
-			res.put("error", "Couldn't connect to database, please try again later!");
+			res.put("error", "Cannot connect to database, please try again later!");
 			response.setContentType("application/json");
 			out.print(res);
 			out.close();

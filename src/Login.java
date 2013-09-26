@@ -15,18 +15,12 @@ import org.lightcouch.CouchDbException;
 public class Login extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
-	private DBHandler dbh = null;
 
 	/**
 	 * @see HttpServlet#HttpServlet()
 	 */
 	public Login() {
 		super();
-		try {
-			dbh = new DBHandler();
-		} catch (Exception e) {
-			// save the error in a log file
-		}
 	}
 
 	/**
@@ -55,11 +49,14 @@ public class Login extends HttpServlet {
 		String errorType = null;
 		boolean success = true;
 		UserData ud = null;
-
+		DBHandler dbh = null;
 		try {
+			try {
+				dbh = new DBHandler();
+			} catch (Exception e){}
 			if (dbh == null)
 				throw new CouchDbException(
-						"Can not connect to DB, please try again later!");
+						"Cannot connect to DB, please try again later!");
 
 			String token = null;
 			String email = request.getParameter("email");
@@ -93,6 +90,8 @@ public class Login extends HttpServlet {
 			dbh.saveToken(ud.getEmail(), token);
 			res.put("token", token);
 
+		} catch(CouchDbException cde) {
+			errorMessage = cde.getMessage();
 		} catch (IllegalArgumentException iae) {
 			errorMessage = iae.getMessage();
 		} catch (SecurityException se) {

@@ -1,10 +1,12 @@
 import java.io.IOException;
 import java.io.PrintWriter;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.json.simple.JSONObject;
 import org.lightcouch.CouchDbException;
 
@@ -15,18 +17,12 @@ import org.lightcouch.CouchDbException;
 public class Logout extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
-	private DBHandler dbh = null;
 
 	/**
 	 * @see HttpServlet#HttpServlet()
 	 */
 	public Logout() {
 		super();
-		try {
-			dbh = new DBHandler();
-		} catch (Exception e) {
-			// save the error in a log file
-		}
 	}
 
 	/**
@@ -54,11 +50,14 @@ public class Logout extends HttpServlet {
 		boolean success = true;
 		String errorMessage = null;
 		String errorType = null;
-
+		DBHandler dbh = null;
 		try {
+			try {
+				dbh = new DBHandler();
+			} catch (Exception e){}
 			if (dbh == null)
 				throw new CouchDbException(
-						"Can not connect to DB, please try again later!");
+						"Cannot connect to DB, please try again later!");
 
 			String token = request.getParameter("token");
 			String email = request.getParameter("email");
