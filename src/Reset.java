@@ -110,10 +110,12 @@ public class Reset extends HttpServlet {
 				res.put("error", dce.getMessage());
 				dbh.writeError("DocumentConflictException", dce);
 				return res;
+			} catch (Exception e) {
+				res.put("success", false);
+				res.put("error", e.getMessage());
+				dbh.writeError("Exception", e);
+				return res;
 			}
-
-			//Send a reminder email
-			/* Saman implementation */
 
 			res.put("success",  true);
 		} catch (Exception e) {

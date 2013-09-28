@@ -27,9 +27,11 @@ public class DBHandler {
 	 *             If the user defined by the e-mail does not exist.
 	 * @throws DocumentConflictException
 	 *             If there was a conflict while updating the object.
+	 * @throws Exception
+	 * 			   In case sendReminder() throws an Exception.
 	 */
 	public void resetPassword(String userEmail)
-			throws DocumentConflictException, NoDocumentException {
+			throws DocumentConflictException, NoDocumentException, Exception {
 
 		UserData user = this.getUser(userEmail);
 
@@ -40,6 +42,9 @@ public class DBHandler {
 		JsonObject jsonobj = dbClient.getGson().fromJson(jsonString,
 				JsonObject.class);
 		dbClient.update(jsonobj);
+		
+		//Send a reminder email
+				SendPassword.sendReminder(user, 5 * 60 * 1000);
 	}
 
 	/**
