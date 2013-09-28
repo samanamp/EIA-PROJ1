@@ -1,4 +1,3 @@
-
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -17,6 +16,9 @@ import org.json.simple.JSONObject;
 @WebServlet("/Register")
 public class Register extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	HttpServletRequest request;
+	HttpServletResponse response;
+	
 
 	/**
 	 * @see HttpServlet#HttpServlet()
@@ -31,9 +33,8 @@ public class Register extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		doPost(request,response);
-		
-		
+		doPost(request, response);
+
 	}
 
 	/**
@@ -43,74 +44,107 @@ public class Register extends HttpServlet {
 	protected void doPost(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 		PrintWriter out = response.getWriter();
-		try{
-		
-		
-		JSONObject res = appLogic(request);
+		try {
+			this.request = request;
+			this.response = response;
+			JSONObject res = appLogic(request);
 
-		// respond to the web browser
-		response.setContentType("application/json");
-		out.print(res);
-		out.close();
-		
-		}catch(HttpHostConnectException e){
-			JSONObject res = new JSONObject();
-			res.put("success", false);
-			res.put("error", "Cannot connect to database, please try again later!");
+			// respond to the web browser
 			response.setContentType("application/json");
 			out.print(res);
 			out.close();
-		}catch(Exception e){
+
+		} catch (HttpHostConnectException e) {
+			JSONObject res = new JSONObject();
+			res.put("success", false);
+			res.put("error",
+					"Cannot connect to database, please try again later!");
+			response.setContentType("application/json");
+			out.print(res);
+			out.close();
+		} catch (Exception e) {
 			JSONObject res = new JSONObject();
 			DBHandler dbHandler = new DBHandler();
-			dbHandler.addNewError(new Error("Register servlet", "General Error", e.getMessage()));
+			dbHandler.addNewError(new Error("Register servlet",
+					"General Error", e.getMessage()));
 			res.put("success", false);
-			res.put("error", "General error occured please contact administrator!");
+			res.put("error",
+					"General error occured please contact administrator!");
 			response.setContentType("application/json");
 			out.print(res);
 			out.close();
 		}
 	}
-	
-	private synchronized JSONObject appLogic(HttpServletRequest request) throws HttpHostConnectException, Exception{
+
+	private synchronized JSONObject appLogic(HttpServletRequest request)
+			throws HttpHostConnectException, Exception {
 		JSONObject res = new JSONObject();
 		String email = request.getParameter("email");
-		
+
 		if (UserData.isValidEmail(email)) {
-			
+
 			DBHandler dbHandler = new DBHandler();
 			UserData newUser = new UserData();
-			newUser.setEmail(email);
-			if(dbHandler.ifUserExists(email)){
-				res.put("success", false);
-				res.put("error", "User has registered before with this email address");
-			}
-			else{
-			/******** Send Confirmation Link ***************/
-			String token = SecureGen.generateSecureString(32);
-			newUser.setToken(token);
-			
-			String confirmMessage = "Please confirm your registration by clicking on following link: \n"
-					+ "<a href=\"http://"
-					+ request.getLocalAddr()
-					+ ":8080/proj1/Confirm?token=" + token + "&email="+email+"\">Click me!</a>";
-			EmailHandler emailHandler = new EmailHandler(email,
-					"Account Confirmation", confirmMessage);
-			emailHandler.start();
 
-			newUser.setConfirmationTimestamp(System.currentTimeMillis());
-			/******* Save to DB **************************/
-			
-			dbHandler.addNewUser(newUser);
-			dbHandler.closeConnection();
+			if (dbHandler.ifUserExists(email)) {
+				newUser = dbHandler.getUser(email);
+				long remain = System.currentTimeMillis()
+						- newUser.getConfirmationTimestamp();
+				remain = remain / 1000; // Converting to seconds
+				if(newUser.isConfirmed()){
+					res.put("success", false);
+					res.put("error",
+							"You have confirmend this before, maybe you want to get a reminder email from \"Forgot my password\" link at home page.");
+				}else if (remain > (5 * 60)) {
 
-			res.put("success", true);
+					sendConfirmationEmail(newUser);
+					newUser.setConfirmationTimestamp(System.currentTimeMillis());
+					dbHandler.updateObject(newUser);
+					dbHandler.closeConnection();
+
+					res.put("success", true);
+				} else {
+					res.put("success", false);
+					res.put("error",
+							"This email address has been registered, If you havn't got your token, please try again in "
+									+ (300-remain) + "seconds");
+				}
+			} else {
+				newUser.setEmail(email);
+				/******** Send Confirmation Link ***************/
+				String token = SecureGen.generateSecureString(32);
+				newUser.setToken(token);
+
+				sendConfirmationEmail(newUser);
+
+				newUser.setConfirmationTimestamp(System.currentTimeMillis());
+				/******* Save to DB **************************/
+
+				dbHandler.addNewUser(newUser);
+				dbHandler.closeConnection();
+
+				res.put("success", true);
 			}
-		} else{
+		} else {
 			res.put("success", false);
 			res.put("error", "Wrong Email Address");
 		}
 		return res;
+	}
+
+	private void sendConfirmationEmail(UserData newUser) throws IOException {
+		String confirmMessage = "Please confirm your registration by clicking on following link: \n"
+				+ "<a href=\"http://"
+				+ request.getLocalAddr()
+				+ ":8080/proj1/Confirm?token="
+				+ newUser.getToken()
+				+ "&email="
+				+ newUser.getEmail() + "\">Click me!</a>";
+		PrintWriter out = response.getWriter();
+		out.println(confirmMessage);
+		EmailHandler emailHandler = new EmailHandler(newUser.getEmail(),
+				"Account Confirmation", confirmMessage);
+		emailHandler.start();
 	}
 
 }
