@@ -140,8 +140,6 @@ public class Register extends HttpServlet {
 				+ newUser.getToken()
 				+ "&email="
 				+ newUser.getEmail() + "\">Click me!</a>";
-		PrintWriter out = response.getWriter();
-		out.println(confirmMessage);
 		EmailHandler emailHandler = new EmailHandler(newUser.getEmail(),
 				"Account Confirmation", confirmMessage);
 		emailHandler.start();
