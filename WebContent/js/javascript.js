@@ -31,14 +31,31 @@ function init() {
 	$("#txtEmail,#txtPassword").bind("keypress", function(e) {
 		$("#frmLogin #error").html("").hide();
 		if (e.which == 13)
-			sendLogin();
+			return false;
+	});
+	
+	$("#txtSendRegister").bind("keypress", function(e) {
+		$("#frmSendRegister #error").html("").hide();
+		if (e.which == 13)
+			return false;
+	});
+	
+	$("#txtSendReminder").bind("keypress", function(e) {
+		$("#frmSendReminder #error").html("").hide();
+		if (e.which == 13)
+			return false;
 	});
 
 	$("#btnLogin").button({
 		text : "Login"
+	}).bind("click", function(event){
+		if ($("#frmLogin").valid()) {
+			sendLogin();
+		}
+		event.preventDefault();
 	});
 
-	loggedInContent = $("#content").html();
+	loggedOutContent = $("#content").html();
 
 	/***************************************************************************
 	 * Open Dialog for reminder and register
@@ -126,7 +143,7 @@ function init() {
 function resetForm(elem) {
 	elem.find(".error").html("");
 	$("#sending").remove();
-	elem.find(".success").remove();
+	$(".success").remove();
 }
 
 function showLoading(text) {
@@ -236,6 +253,7 @@ function sendLogin() {
  * Generates the content that will appear when the user is logged in
  ******************************************************************************/
 function generateLoggedInContent() {
+	$(".success").remove();
 	var new_div = $("<div />", {
 		id : "loggedIn"
 	});
@@ -374,14 +392,14 @@ function sendLogout() {
  * Generates the content that will appear when the user is logged out
  ******************************************************************************/
 function generateLoggedOutContent(message, messageClass) {
+	$(".success").remove();
 	$("#loggedIn").fadeOut(
 			500,
 			function() {
 				$("#loggedIn").remove();
-				var lic = $(loggedInContent);
-				lic.hide();
-				$("#content").append(lic);
 
+				$("#content").append(loggedOutContent);
+				$(".success").remove();
 				if (message != null) {
 					if (messageClass == "error") {
 						$("#frmLogin #error").html(
@@ -395,7 +413,6 @@ function generateLoggedOutContent(message, messageClass) {
 				}
 
 				init();
-				lic.fadeIn(300);
 			});
 }
 
