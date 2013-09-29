@@ -19,35 +19,6 @@ public class DBHandler {
 	}
 
 	/**
-	 * Sets the password of a given user to a new randomly generated password.
-	 * 
-	 * @param The
-	 *            e-mail the user is registered with
-	 * @throws NoDocumentException
-	 *             If the user defined by the e-mail does not exist.
-	 * @throws DocumentConflictException
-	 *             If there was a conflict while updating the object.
-	 * @throws Exception
-	 * 			   In case sendReminder() throws an Exception.
-	 */
-	public void resetPassword(String userEmail)
-			throws DocumentConflictException, NoDocumentException, Exception {
-
-		UserData user = this.getUser(userEmail);
-
-		String newPassword = SecureGen.generateSecureString(12);
-		user.setPassword(newPassword);
-
-		String jsonString = gson.toJson(user);
-		JsonObject jsonobj = dbClient.getGson().fromJson(jsonString,
-				JsonObject.class);
-		dbClient.update(jsonobj);
-		
-		//Send a reminder email
-				SendPassword.sendReminder(user, 5 * 60 * 1000);
-	}
-
-	/**
 	 * Deletes the user data related to the given e-mail.
 	 * 
 	 * @param The

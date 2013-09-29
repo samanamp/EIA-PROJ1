@@ -77,9 +77,9 @@ public class Reset extends HttpServlet {
 
 			//Verify the session
 			String token = (String) request.getParameter("token");
+			UserData user = dbh.getUser(email);
 			if (token != null) {
 				//Validate the user session
-				UserData user = dbh.getUser(email);
 				if (user != null && user.getToken() != null) {
 					if (!user.getToken().equals(token) || !user.isConfirmed()) {
 						res.put("success", false);
@@ -99,7 +99,10 @@ public class Reset extends HttpServlet {
 
 			//Reset the password
 			try {
-				dbh.resetPassword(email);
+				String newPassword = SecureGen.generateSecureString(12);
+				user.setPassword(newPassword);
+				dbh.updateObject(user);
+				SendPassword.sendReminder(user, 0);
 			} catch (NoDocumentException nde) {
 				res.put("success", false);
 				res.put("error", nde.getMessage());

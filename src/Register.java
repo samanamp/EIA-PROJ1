@@ -94,7 +94,7 @@ public class Register extends HttpServlet {
 				if(newUser.isConfirmed()){
 					res.put("success", false);
 					res.put("error",
-							"You have confirmend this before, maybe you want to get a reminder email from \"Forgot my password\" link at home page.");
+							"You have confirmed this before, maybe you want to get a reminder email from \"Forgot my password\" link at home page.");
 				}else if (remain > (5 * 60)) {
 
 					sendConfirmationEmail(newUser);
