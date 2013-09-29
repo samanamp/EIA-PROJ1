@@ -33,7 +33,10 @@ public class Confirm extends HttpServlet {
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 		try{
+			String redirectScript = "<script type=\"text/javascript\"> function leave() { self.location = \"index.html\"; } setTimeout(\"leave()\", 5000); </script>";
+			response.getWriter().println(redirectScript + "<h3>You will be redirected to homepage in 5 secondes...<h3><br><h2><i>");
 			appLogic(request, response);
+			response.getWriter().println("</i></h2>");
 		}catch(Exception e){
 			e.printStackTrace(response.getWriter());
 		}

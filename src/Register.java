@@ -106,8 +106,8 @@ public class Register extends HttpServlet {
 				} else {
 					res.put("success", false);
 					res.put("error",
-							"This email address has been registered, If you havn't got your token, please try again in "
-									+ (300-remain) + "seconds");
+							"You have entered your email address less than 5 minutes before, If you havn't got your confirmation email, please try again in "
+									+ (300-remain) + "seconds.");
 				}
 			} else {
 				newUser.setEmail(email);
